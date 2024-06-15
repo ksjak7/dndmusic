@@ -1,92 +1,72 @@
-import Image from 'next/image'
-import Link from 'next/link'
 import { Suspense } from 'react'
 import Table from '@/components/table'
 import TablePlaceholder from '@/components/table-placeholder'
-import ExpandingArrow from '@/components/expanding-arrow'
+import { generateRandomString, objectToQueryString } from '@/lib/utils'
+import { redirect } from 'next/navigation'
+import { seed } from '@/lib/seed'
+import { sql } from '@vercel/postgres'
 
-export const runtime = 'edge'
-export const preferredRegion = 'home'
-export const dynamic = 'force-dynamic'
+export default async function Home(
+  {
+    params,
+    searchParams,
+  }: {
+    params: { slug: string }
+    searchParams: { [key: string]: string | string[] | undefined }
+  }
+) {
+  const code = searchParams['code']
+  let accessToken
+  if (!code) {
+    auth()
+  } 
+  // else {
+  //   accessToken = await getAccessToken(code.toString());
+  //   if (accessToken["error"] !== undefined) auth()
+  // }
+  let data
+  await seed()
+  data = await sql`
+    SELECT DISTINCT s.id, s.title 
+    FROM songs s 
+    JOIN songtags st ON s.id = st.song_id`
+  const { rows: songs } = data
 
-export default function Home() {
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center">
-      <Link
-        href="https://vercel.com/templates/next.js/postgres-starter"
-        className="group mt-20 sm:mt-0 rounded-full flex space-x-1 bg-white/30 shadow-sm ring-1 ring-gray-900/5 text-gray-600 text-sm font-medium px-10 py-2 hover:shadow-lg active:shadow-sm transition-all"
-      >
-        <p>Deploy your own to Vercel</p>
-        <ExpandingArrow />
-      </Link>
-      <h1 className="pt-4 pb-8 bg-gradient-to-br from-black via-[#171717] to-[#575757] bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-7xl">
-        Postgres on Vercel
-      </h1>
       <Suspense fallback={<TablePlaceholder />}>
-        <Table />
+        <Table songs = { songs } />
       </Suspense>
-      <p className="font-light text-gray-600 w-full max-w-lg text-center mt-6">
-        <Link
-          href="https://vercel.com/postgres"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Vercel Postgres
-        </Link>{' '}
-        demo. <br /> Built with{' '}
-        <Link
-          href="https://nextjs.org/docs"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Next.js App Router
-        </Link>
-        .
-      </p>
-
-      <div className="flex justify-center space-x-5 pt-10 mt-10 border-t border-gray-300 w-full max-w-xl text-gray-600">
-        <Link
-          href="https://postgres-prisma.vercel.app/"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Prisma
-        </Link>
-        <Link
-          href="https://postgres-kysely.vercel.app/"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Kysely
-        </Link>
-        <Link
-          href="https://postgres-drizzle.vercel.app/"
-          className="font-medium underline underline-offset-4 hover:text-black transition-colors"
-        >
-          Drizzle
-        </Link>
-      </div>
-
-      <div className="sm:absolute sm:bottom-0 w-full px-20 py-10 flex justify-between">
-        <Link href="https://vercel.com">
-          <Image
-            src="/vercel.svg"
-            alt="Vercel Logo"
-            width={100}
-            height={24}
-            priority
-          />
-        </Link>
-        <Link
-          href="https://github.com/vercel/examples/tree/main/storage/postgres-starter"
-          className="flex items-center space-x-2"
-        >
-          <Image
-            src="/github.svg"
-            alt="GitHub Logo"
-            width={24}
-            height={24}
-            priority
-          />
-          <p className="font-light">Source</p>
-        </Link>
-      </div>
     </main>
   )
 }
+
+function auth() {
+  var state = generateRandomString(16)
+    var scope = 'user-read-private user-read-email'
+
+    redirect('https://accounts.spotify.com/authorize?' +
+      objectToQueryString({
+        response_type: 'code',
+        client_id: process.env.CLIENT_ID,
+        scope: scope,
+        redirect_uri: process.env.REDIRECT_URI,
+        state: state,
+      }))
+}
+
+// async function getAccessToken(code: string) {
+//   const params = new URLSearchParams()
+//   params.append("client_id", process.env.CLIENT_ID!)
+//   params.append("client_secret", process.env.CLIENT_SECRET!)
+//   params.append("grant_type", "authorization_code")
+//   params.append("code", code)
+//   params.append("redirect_uri", process.env.REDIRECT_URI!)
+
+//   return await fetch("https://accounts.spotify.com/api/token", {
+//       method: "POST",
+//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
+//       body: params
+//   })
+//   .then(response => response.json())
+// }

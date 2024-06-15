@@ -1,35 +1,46 @@
-import { sql } from '@vercel/postgres'
+'use client'
+import { useState } from 'react'
 import RefreshButton from './refresh-button'
-import { seed } from '@/lib/seed'
+import { QueryResultRow } from '@vercel/postgres'
 
-export default async function Table() {
-  let data
+export default function Table(
+  {
+    songs
+  }:
+    {
+      songs: QueryResultRow[]
+    }
+) {
 
-  await seed()
-  data = await sql`SELECT * FROM songtags`
-  const { rows: songs } = data
-
+  const [currentSongId, setCurrent] = useState(songs[0].id)
   return (
     <div className="bg-white/30 p-12 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg max-w-xl mx-auto w-full">
+      <iframe src={`https://open.spotify.com/embed/track/${currentSongId}?utm_source=generator`} width="100%" height="200" allow="" loading="lazy"></iframe>
       <div className="flex justify-between items-center mb-4">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold">Songs</h2>
         </div>
         <div className='flex flex-row justify-end gap-5'>
-          <h2 className='text-sm text-gray-500 hover:text-gray-900'>Filter</h2>
+          <button className='text-sm text-gray-500 hover:text-gray-900'>Filter</button>
           <button className='text-sm text-gray-500 hover:text-gray-900'>Add</button>
           <RefreshButton />
         </div>
       </div>
-      <div className="divide-y divide-gray-900/5">
+      <ol className='flex flex-col'>
         {
-        songs.map((song) => (
-            <div key={song.song_id}>
-              <iframe src={`https://open.spotify.com/embed/track/${song.song_id}?utm_source=generator`} width="100%" height="200" loading="lazy"></iframe>
-            </div>
-        ))
+          songs.map((song) => (
+            <li key={song.id} className='mb-5 outline outline-1 rounded-full px-5 py-1 outline-gray-300 shadow'>
+              <button className="justify-items-center" onClick={() => { if (currentSongId != song.id) setCurrent(song.id) }}>
+                {song.title}
+              </button>
+            </li>
+          ))
         }
-      </div>
+      </ol>
     </div>
   )
 }
+
+// EmbedController.addListener('playback_update', e => {
+//   document.getElementById('progressTimestamp').innerText = `${parseInt(e.data.position / 1000, 10)} s`;
+//   });
