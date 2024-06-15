@@ -22,11 +22,13 @@ export default async function Table() {
         </div>
       </div>
       <div className="divide-y divide-gray-900/5">
-        {songs.map((song) => (
+        {
+        songs.map((song) => (
             <div key={song.song_id}>
               <iframe src={`https://open.spotify.com/embed/track/${song.song_id}?utm_source=generator`} width="100%" height="200" loading="lazy"></iframe>
             </div>
-        ))}
+        ))
+        }
       </div>
     </div>
   )

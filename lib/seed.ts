@@ -14,12 +14,6 @@ export async function seed() {
         tag TEXT NOT NULL,
         FOREIGN KEY(song_id) REFERENCES songs(id)
       )
-    `,
-    sql`
-      INSERT INTO songs (id, title) VALUES ('6AI3ezQ4o3HUoP6Dhudph3', 'Not Like Us')
-    `,
-    sql`
-      INSERT INTO songtags (song_id, tag) VALUES ('6AI3ezQ4o3HUoP6Dhudph3', 'rap')
     `
   ])
 }
