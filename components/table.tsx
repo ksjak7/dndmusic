@@ -18,13 +18,11 @@ export default async function Table() {
         </div>
         <RefreshButton />
       </div>
-      <ol className="divide-y divide-gray-900/5">
+      <div className="divide-y divide-gray-900/5">
         {songs.map((song) => (
-          <div key={song.song_id}>
-            <iframe src={`https://open.spotify.com/embed/track/${song.song_id}?utm_source=generator`} width="100%" height="200" allow="clipboard-write; encrypted-media;" loading="lazy"></iframe>
-          </div>
+          <iframe src={`https://open.spotify.com/embed/track/${song.song_id}?utm_source=generator`} width="100%" height="352" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
         ))}
-      </ol>
+      </div>
     </div>
   )
 }
