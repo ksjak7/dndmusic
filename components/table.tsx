@@ -12,10 +12,12 @@ export default function Table(
     }
 ) {
 
-  const [currentSongId, setCurrent] = useState(songs[0].id)
+  const [currentSongId, setCurrent] = useState('')
   return (
     <div className="bg-white/30 p-12 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg max-w-xl mx-auto w-full">
-      <iframe src={`https://open.spotify.com/embed/track/${currentSongId}?utm_source=generator`} width="100%" height="200" allow="" loading="lazy"></iframe>
+      {
+        currentSongId ? <iframe src={`https://open.spotify.com/embed/track/${currentSongId}?utm_source=generator`} width="100%" height="200" allow="" loading="lazy"></iframe> : <></>
+      }
       <div className="flex justify-between items-center mb-4">
         <div className="space-y-1">
           <h2 className="text-xl font-semibold">Songs</h2>

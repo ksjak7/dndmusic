@@ -37,8 +37,7 @@ export default async function Home(
   await seed()
   data = await sql`
     SELECT DISTINCT s.id, s.title 
-    FROM songs s 
-    JOIN songtags st ON s.id = st.song_id`
+    FROM songs s`
   const { rows: songs } = data
 
   return (
