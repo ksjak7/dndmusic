@@ -6,6 +6,7 @@ import { sql } from '@vercel/postgres'
 import { AuthenticatePage } from '@/components/authenticate-page'
 import { redirect } from 'next/navigation'
 import { fetchProfile, getAccessToken } from '@/lib/spotify-api'
+import { generateRandomString } from '@/lib/utils'
 
 export default async function Home(
   {
@@ -17,15 +18,17 @@ export default async function Home(
   }
 ) {
   const code = searchParams['code']
-  let accessToken
 
+  let accessToken
   if (!code) {
+    var state = generateRandomString(16)
+    var scope = 'user-read-private user-read-email'
     return (
       <main className="relative flex min-h-screen flex-col items-center justify-center">
-        <AuthenticatePage client_id = { process.env.CLIENT_ID! } redirect_uri = { process.env.REDIRECT_URI! } />
+        <AuthenticatePage client_id={process.env.CLIENT_ID!} redirect_uri={process.env.REDIRECT_URI!} state={state} scope={scope} />
       </main>
     )
-  } 
+  }
   else {
     accessToken = await getAccessToken(code.toString());
     if (accessToken["error"] !== undefined) redirect("/")
@@ -44,7 +47,7 @@ export default async function Home(
     <main className="relative flex min-h-screen flex-col items-center justify-center">
       <h2>Hello, {profileData.display_name}</h2>
       <Suspense fallback={<TablePlaceholder />}>
-        <Table songs = { songs } />
+        <Table songs={songs} />
       </Suspense>
     </main>
   )

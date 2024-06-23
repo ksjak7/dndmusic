@@ -1,18 +1,21 @@
 'use client'
-import { generateRandomString, objectToQueryString } from "@/lib/utils"
+import { objectToQueryString } from "@/lib/utils"
 import SpotifyLogo from "./spotify-logo"
 
 export function AuthenticatePage(
   {
     client_id,
-    redirect_uri
+    redirect_uri,
+    state,
+    scope
   }: {
     client_id: string,
-    redirect_uri: string
+    redirect_uri: string,
+    state: string,
+    scope: string
   }
 ) {
-  var state = generateRandomString(16)
-  var scope = 'user-read-private user-read-email'
+
   return (
     <div className="bg-white/30 p-12 shadow-xl ring-1 ring-gray-900/5 rounded-lg backdrop-blur-lg max-w-xl mx-auto w-full">
       <div className="items-center flex flex-col gap-5">
