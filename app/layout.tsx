@@ -3,9 +3,9 @@ import { Inter } from 'next/font/google'
 
 export const metadata = {
   metadataBase: new URL('https://postgres-starter.vercel.app'),
-  title: 'Vercel Postgres Demo',
+  title: 'D&D Music',
   description:
-    'A simple Next.js app with Vercel Postgres as the database',
+    '',
 }
 
 const inter = Inter({

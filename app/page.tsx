@@ -1,10 +1,11 @@
 import { Suspense } from 'react'
 import Table from '@/components/table'
 import TablePlaceholder from '@/components/table-placeholder'
-import { generateRandomString, objectToQueryString } from '@/lib/utils'
-import { redirect } from 'next/navigation'
 import { seed } from '@/lib/seed'
 import { sql } from '@vercel/postgres'
+import { AuthenticatePage } from '@/components/authenticate-page'
+import { redirect } from 'next/navigation'
+import { fetchProfile, getAccessToken } from '@/lib/spotify-api'
 
 export default async function Home(
   {
@@ -17,13 +18,21 @@ export default async function Home(
 ) {
   const code = searchParams['code']
   let accessToken
+
   if (!code) {
-    auth()
+    return (
+      <main className="relative flex min-h-screen flex-col items-center justify-center">
+        <AuthenticatePage client_id = { process.env.CLIENT_ID! } redirect_uri = { process.env.REDIRECT_URI! } />
+      </main>
+    )
   } 
-  // else {
-  //   accessToken = await getAccessToken(code.toString());
-  //   if (accessToken["error"] !== undefined) auth()
-  // }
+  else {
+    accessToken = await getAccessToken(code.toString());
+    if (accessToken["error"] !== undefined) redirect("/")
+  }
+
+  const profileData = await fetchProfile(accessToken.access_token)
+
   let data
   await seed()
   data = await sql`
@@ -34,39 +43,10 @@ export default async function Home(
 
   return (
     <main className="relative flex min-h-screen flex-col items-center justify-center">
+      <h2>Hello, {profileData.display_name}</h2>
       <Suspense fallback={<TablePlaceholder />}>
         <Table songs = { songs } />
       </Suspense>
     </main>
   )
 }
-
-function auth() {
-  var state = generateRandomString(16)
-    var scope = 'user-read-private user-read-email'
-
-    redirect('https://accounts.spotify.com/authorize?' +
-      objectToQueryString({
-        response_type: 'code',
-        client_id: process.env.CLIENT_ID,
-        scope: scope,
-        redirect_uri: process.env.REDIRECT_URI,
-        state: state,
-      }))
-}
-
-// async function getAccessToken(code: string) {
-//   const params = new URLSearchParams()
-//   params.append("client_id", process.env.CLIENT_ID!)
-//   params.append("client_secret", process.env.CLIENT_SECRET!)
-//   params.append("grant_type", "authorization_code")
-//   params.append("code", code)
-//   params.append("redirect_uri", process.env.REDIRECT_URI!)
-
-//   return await fetch("https://accounts.spotify.com/api/token", {
-//       method: "POST",
-//       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-//       body: params
-//   })
-//   .then(response => response.json())
-// }

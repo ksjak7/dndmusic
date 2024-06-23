@@ -29,9 +29,12 @@ export default function Table(
       <ol className='flex flex-col'>
         {
           songs.map((song) => (
-            <li key={song.id} className='mb-5 outline outline-1 rounded-full px-5 py-1 outline-gray-300 shadow'>
-              <button className="justify-items-center" onClick={() => { if (currentSongId != song.id) setCurrent(song.id) }}>
+            <li key={song.id} className='flex flex-row mb-5 outline outline-1 rounded-full px-5 py-1 outline-gray-300 shadow justify-between'>
+              <button className="w-full text-start" onClick={() => { if (currentSongId != song.id) setCurrent(song.id) }}>
                 {song.title}
+              </button>
+              <button>
+                ⋯
               </button>
             </li>
           ))
