@@ -14,23 +14,24 @@ export default async function Home() {
     var state = generateRandomString(16)
     var scope = 'user-read-private user-read-email'
     return (
-      <main className="relative flex min-h-screen flex-col items-center justify-center">
         <AuthenticatePage client_id={process.env.CLIENT_ID!} redirect_uri={process.env.REDIRECT_URI!} state={state} scope={scope} />
-      </main>
     )
   }
 
   const accessTokenCookie = cookies().get('access_token')
   if (accessTokenCookie === undefined || accessTokenCookie.value == "") {
-    console.log("Invalid AccessToken; reauthenticating")
     await auth()
     return
   }
-  const accessToken = accessTokenCookie.value
-  console.log("AccessToken", accessToken)
-  const profileData = await fetchProfile(accessToken)
 
-  console.log(profileData)
+  const accessToken = accessTokenCookie.value
+  const profileData = await fetchProfile(accessToken)
+  
+  if (!profileData) {
+    return (
+      <div>Unauthorized to use this application!</div>
+    )
+  }
 
   let data
   await seed()
@@ -40,12 +41,12 @@ export default async function Home() {
   const { rows: songs } = data
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center">
+    <>
       <h2>Hello, {profileData.display_name}</h2>
       <Suspense fallback={<TablePlaceholder />}>
         <Table songs={songs} />
       </Suspense>
-    </main>
+    </>
   )
 }
 

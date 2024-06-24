@@ -15,7 +15,12 @@ export async function getAccessToken(code: string) {
 }
 
 export async function fetchProfile(token: string) {
-  return await fetch("https://api.spotify.com/v1/me", {
+  const response = await fetch("https://api.spotify.com/v1/me", {
     method: "GET", headers: { Authorization: `Bearer ${token}` }
-  }).then(response => response.json())
+  })
+
+  if (response.ok) {
+    return response.json()
+  }
+  return undefined
 }

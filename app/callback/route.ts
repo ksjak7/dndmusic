@@ -13,7 +13,6 @@ export async function GET(
 
   const accessToken = await getAccessToken(code)
   if (accessToken["error"] !== undefined) {
-    console.log("Failed to retrieve access token: ", accessToken["error"])
     redirect('/')
   }
 
