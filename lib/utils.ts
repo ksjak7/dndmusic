@@ -1,4 +1,3 @@
-import { sql } from "@vercel/postgres";
 import { randomBytes } from "crypto";
 
 export function generateRandomString(length: number): string {

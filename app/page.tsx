@@ -6,21 +6,11 @@ import { sql } from '@vercel/postgres'
 import { AuthenticatePage } from '@/components/authenticate-page'
 import { redirect } from 'next/navigation'
 import { fetchProfile, getAccessToken } from '@/lib/spotify-api'
-import { generateRandomString } from '@/lib/utils'
+import { generateRandomString, objectToQueryString } from '@/lib/utils'
+import { cookies } from 'next/headers'
 
-export default async function Home(
-  {
-    params,
-    searchParams,
-  }: {
-    params: { slug: string }
-    searchParams: { [key: string]: string | string[] | undefined }
-  }
-) {
-  const code = searchParams['code']
-
-  let accessToken
-  if (!code) {
+export default async function Home() {
+  if (!cookies().has('access_token')) {
     var state = generateRandomString(16)
     var scope = 'user-read-private user-read-email'
     return (
@@ -29,12 +19,18 @@ export default async function Home(
       </main>
     )
   }
-  else {
-    accessToken = await getAccessToken(code.toString());
-    if (accessToken["error"] !== undefined) redirect("/")
-  }
 
-  const profileData = await fetchProfile(accessToken.access_token)
+  const accessTokenCookie = cookies().get('access_token')
+  if (accessTokenCookie === undefined || accessTokenCookie.value == "") {
+    console.log("Invalid AccessToken; reauthenticating")
+    await auth()
+    return
+  }
+  const accessToken = accessTokenCookie.value
+  console.log("AccessToken", accessToken)
+  const profileData = await fetchProfile(accessToken)
+
+  console.log(profileData)
 
   let data
   await seed()
@@ -51,4 +47,17 @@ export default async function Home(
       </Suspense>
     </main>
   )
+}
+
+async function auth() {
+  var scope = 'user-read-private user-read-email'
+  var state = generateRandomString(16)
+  redirect('https://accounts.spotify.com/authorize?' +
+    objectToQueryString({
+      response_type: 'code',
+      client_id: process.env.CLIENT_ID!,
+      scope: scope,
+      redirect_uri: process.env.REDIRECT_URI!,
+      state: state,
+    }))
 }
